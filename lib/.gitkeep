@@ -1,0 +1,8 @@
+# Lib Directory
+
+This directory contains utility functions and API logic.
+
+Example structure:
+- api.ts - API client functions
+- utils.ts - Helper utilities
+- constants.ts - Application constants

@@ -1,0 +1,9 @@
+# Components Directory
+
+This directory contains reusable UI components for the application.
+
+Example structure:
+- Button.tsx
+- Header.tsx
+- Footer.tsx
+- ContentCard.tsx
