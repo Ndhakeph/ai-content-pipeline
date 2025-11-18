@@ -22,3 +22,20 @@ export interface GenerationResult {
   status: "pending" | "completed" | "failed";
   error?: string;
 }
+
+// Agent Infrastructure Types
+
+export interface AgentResult {
+  agent: string;
+  output: string;
+  metadata?: any;
+}
+
+export interface PipelineState {
+  runId: string;
+  prd: string;
+  research?: string;
+  draft?: string;
+  factCheckPassed?: boolean;
+  finalPost?: string;
+}
