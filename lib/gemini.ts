@@ -3,12 +3,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 /**
  * Calls the Gemini API to generate text content
  * @param prompt - The prompt to send to the model
- * @param model - The model to use (default: "gemini-2.0-flash-exp")
+ * @param model - The model to use (default: "gemini-2.0-flash")
  * @returns The generated text content
  */
 export async function callGemini(
   prompt: string,
-  model: string = "gemini-2.0-flash-exp"
+  model: string = "gemini-2.0-flash"
 ): Promise<string> {
   try {
     const apiKey = process.env.GOOGLE_API_KEY;

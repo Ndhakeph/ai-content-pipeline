@@ -96,7 +96,7 @@ List any claims in the draft that are NOT supported by the sources. If everythin
 
     const factCheckResult = await callGemini(
       factCheckPrompt,
-      "gemini-2.0-flash-thinking-exp"
+      "gemini-2.0-flash"
     );
 
     // Parse the response
