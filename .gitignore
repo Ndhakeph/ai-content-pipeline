@@ -20,6 +20,14 @@
 .DS_Store
 *.pem
 
+# Python (if any scripts added)
+__pycache__/
+*.pyc
+venv/
+
+# Build artifacts
+dist/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

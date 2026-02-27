@@ -99,19 +99,21 @@ List any claims in the draft that are NOT supported by the sources. If everythin
       "gemini-2.0-flash"
     );
 
-    // Parse the response
-    const resultText = factCheckResult.toUpperCase();
+    // Parse the response - check if it starts with PASS or is only PASS
+    // Avoid false positives from "PASS" appearing mid-sentence
+    const trimmedResult = factCheckResult.trim();
+    const firstLine = trimmedResult.split("\n")[0].trim().toUpperCase();
 
-    if (resultText.includes("PASS")) {
+    if (firstLine === "PASS" || firstLine === "PASS.") {
       return { passed: true, issues: [] };
     }
 
     // Extract issues from the response
     const issues = factCheckResult
       .split("\n")
-      .filter((line) => line.trim().length > 0 && !line.toUpperCase().includes("PASS"))
+      .filter((line) => line.trim().length > 0)
       .map((line) => line.replace(/^[-*•]\s*/, "").trim())
-      .filter((line) => line.length > 0);
+      .filter((line) => line.length > 0 && line.toUpperCase() !== "PASS");
 
     return { passed: false, issues };
   } catch (error) {
