@@ -1,6 +1,6 @@
 # AI Content Pipeline
 
-A multi-agent system that generates blog posts using four specialized AI agents: Researcher, Writer, Fact-Checker, and Polisher.
+A multi-agent system that generates blog posts by coordinating four specialized AI agents through research, writing, fact-checking, and polishing stages.
 
 ## Why I Built This
 
@@ -29,33 +29,46 @@ I wanted to understand how to coordinate multiple AI agents in a pipeline where 
 │ search Tavily  │      │ as context      │      │ (triggers retry  │
 │                │      │                 │      │  if issues found)│
 └────────────────┘      └─────────────────┘      └──────────┬───────┘
-                                                            │
-                                                  ┌─────────▼────────┐
-                                                  │ POLISHER         │
-                                                  │                  │
-                                                  │ Grammar, tone,   │
-                                                  │ clarity fixes    │
-                                                  │ (no fact changes)│
-                                                  └─────────┬────────┘
-                                                            │
-                                                  ┌─────────▼────────┐
-                                                  │  Final Output    │
-                                                  └──────────────────┘
+                                                           │
+                                                 ┌─────────▼────────┐
+                                                 │ POLISHER         │
+                                                 │                  │
+                                                 │ Grammar, tone,   │
+                                                 │ clarity fixes    │
+                                                 │ (no fact changes)│
+                                                 └─────────┬────────┘
+                                                           │
+                                                 ┌─────────▼────────┐
+                                                 │  Final Output    │
+                                                 └──────────────────┘
 ```
 
-The fact-checker is the key piece. It compares the draft against the research findings and identifies unsupported claims. If it finds issues, the orchestrator sends feedback back to the writer agent for revision (max 2 retries). This catches hallucinations before they make it to the final output.
+1. **Researcher** extracts 2-3 key topics from the PRD using Gemini, then queries Tavily for each topic
+2. **Writer** receives the PRD + research context and generates an 800-1000 word draft
+3. **Fact-Checker** compares the draft against research sources, flags unsupported claims
+4. **Orchestrator** sends fact-check feedback back to Writer (max 2 retries) if issues are found
+5. **Polisher** refines grammar and tone without changing factual content
+
+Every agent action is logged to Supabase with timestamps, enabling full observability of the pipeline execution.
+
+## Key Technical Decisions
+
+- **Tavily over raw Google results**: Tavily returns LLM-optimized summaries instead of raw HTML, which means the research context stays concise and the Writer agent doesn't hallucinate from noisy inputs.
+
+- **Retry loop with ceiling**: The fact-checker triggers Writer revisions up to 2 times. Beyond that, I log a warning and proceed — sometimes the LLM just disagrees with itself about whether a claim is "supported," and blocking forever isn't practical.
+
+- **Lazy Supabase initialization**: The client is initialized on first use rather than at import time. This prevents build failures when env vars aren't set (common in CI) and keeps the module side-effect free.
 
 ## Tech Stack
 
-- **Next.js 14** — App Router, API routes for orchestration
-- **TypeScript** — Agent coordination and state management
-- **Google Gemini 2.0 Flash** — Powers all four agents
-- **Tavily API** — Web search (returns LLM-friendly summaries, unlike raw Google results)
-- **Supabase** — PostgreSQL for logging every agent action with timestamps
+- Next.js 14 (App Router)
+- TypeScript
+- Google Gemini 2.0 Flash
+- Tavily API (web search)
+- Supabase (PostgreSQL for logging)
+- Tailwind CSS
 
 ## Getting Started
-
-**Prerequisites:** Node.js 18+, API keys for Gemini, Tavily, and Supabase (all have free tiers)
 
 ```bash
 git clone https://github.com/tacitusblindsbig/ai-content-pipeline
@@ -63,7 +76,7 @@ cd ai-content-pipeline
 npm install
 
 cp .env.local.example .env.local
-# Add your keys:
+# Add your keys to .env.local:
 #   GOOGLE_API_KEY
 #   TAVILY_API_KEY
 #   NEXT_PUBLIC_SUPABASE_URL
@@ -86,12 +99,38 @@ CREATE TABLE agent_logs (
 CREATE INDEX idx_agent_logs_run_id ON agent_logs(run_id);
 ```
 
-Then `npm run dev` and open `http://localhost:3000`.
+Run locally:
+
+```bash
+npm run dev
+# Open http://localhost:3000
+```
+
+## Project Structure
+
+```
+ai-content-pipeline/
+├── app/
+│   ├── api/generate/route.ts   # POST endpoint, runs the pipeline
+│   ├── page.tsx                # Main UI with PRD input form
+│   └── layout.tsx              # Root layout
+├── lib/
+│   ├── orchestrator.ts         # Pipeline coordination + retry logic
+│   ├── agents.ts               # Researcher, Writer, Fact-Checker, Polisher
+│   ├── gemini.ts               # Gemini API wrapper
+│   ├── tavily.ts               # Tavily search wrapper
+│   └── supabase.ts             # Logging client
+├── components/
+│   ├── ResultsDisplay.tsx      # Final post + metadata panel
+│   └── Timeline.tsx            # Agent execution timeline
+└── types/
+    └── index.ts                # PipelineState interface
+```
 
 ## What I Learned
 
-The hardest part was deciding what to do when fact-checking fails repeatedly. My first instinct was to block publication entirely, but that's not practical — sometimes the LLM just disagrees with itself about whether a claim is "supported." I settled on logging a warning and proceeding after 2 retries. It's a tradeoff between quality guarantees and actually producing output. If I rebuilt this, I'd add a human review queue for posts that fail fact-checking instead of auto-publishing them with a warning.
+The hardest part was deciding what to do when fact-checking fails repeatedly. My first instinct was to block publication entirely, but that's not practical — sometimes the LLM just disagrees with itself about whether a claim is "supported." I settled on logging a warning and proceeding after 2 retries. It's a tradeoff between quality guarantees and actually producing output. If I rebuilt this, I'd add a human review queue for posts that fail fact-checking instead of auto-publishing them with a warning. I also learned that choosing the right search API matters a lot — Tavily's LLM-optimized responses cut my prompt sizes in half compared to scraping raw search results.
 
----
+## License
 
-**Nishad Dhakephalkar** · [GitHub](https://github.com/tacitusblindsbig) · ndhakeph@gmail.com
+MIT

@@ -55,7 +55,31 @@ export default function Timeline({ runId }: TimelineProps) {
   };
 
   useEffect(() => {
-    fetchLogs();
+    const doFetch = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const { data, error: fetchError } = await supabase
+          .from("agent_logs")
+          .select("*")
+          .eq("run_id", runId)
+          .order("created_at", { ascending: true });
+
+        if (fetchError) {
+          throw fetchError;
+        }
+
+        setLogs(data || []);
+      } catch (err) {
+        console.error("Error fetching logs:", err);
+        setError(err instanceof Error ? err.message : "Failed to fetch logs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    doFetch();
   }, [runId]);
 
   const toggleExpanded = (logId: string) => {
