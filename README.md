@@ -1,5 +1,9 @@
 # AI Content Pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+![Demo](docs/demo.gif)
+
 A multi-agent system that generates blog posts by coordinating four specialized AI agents through research, writing, fact-checking, and polishing stages.
 
 ## Why I Built This
@@ -51,7 +55,7 @@ I wanted to understand how to coordinate multiple AI agents in a pipeline where 
 
 Every agent action is logged to Supabase with timestamps, enabling full observability of the pipeline execution.
 
-## Key Technical Decisions
+## 🔧 Key Technical Decisions
 
 - **Tavily over raw Google results**: Tavily returns LLM-optimized summaries instead of raw HTML, which means the research context stays concise and the Writer agent doesn't hallucinate from noisy inputs.
 
@@ -59,7 +63,7 @@ Every agent action is logged to Supabase with timestamps, enabling full observab
 
 - **Lazy Supabase initialization**: The client is initialized on first use rather than at import time. This prevents build failures when env vars aren't set (common in CI) and keeps the module side-effect free.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - Next.js 14 (App Router)
 - TypeScript
@@ -68,7 +72,7 @@ Every agent action is logged to Supabase with timestamps, enabling full observab
 - Supabase (PostgreSQL for logging)
 - Tailwind CSS
 
-## Getting Started
+## 🚀 Getting Started
 
 ```bash
 git clone https://github.com/tacitusblindsbig/ai-content-pipeline
