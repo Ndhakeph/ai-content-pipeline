@@ -75,7 +75,7 @@ Every agent action is logged to Supabase with timestamps, enabling full observab
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/tacitusblindsbig/ai-content-pipeline
+git clone https://github.com/Ndhakeph/ai-content-pipeline
 cd ai-content-pipeline
 npm install
 
