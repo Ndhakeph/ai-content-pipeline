@@ -67,7 +67,7 @@ Every agent action is logged to Supabase with timestamps, enabling full observab
 
 - Next.js 14 (App Router)
 - TypeScript
-- Google Gemini 2.0 Flash
+- Google Gemini (configurable)
 - Tavily API (web search)
 - Supabase (PostgreSQL for logging)
 - Tailwind CSS
